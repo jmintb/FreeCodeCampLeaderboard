@@ -1,0 +1,98 @@
+import React, { Component } from 'react';
+OOimport logo from './logo.svg';
+imOBOBOBOBOBOOBOOBOOBOport './App.css';
+var jquery = require('OBOBOjquery');
+
+var last30DaysURL = 
+'https:OAAOAOOn
+
+//fcctop100.herokuapp.com/api/fccusers/top/recent';
+var allTimeURL = 'https://fcctop100.herokuapp.com/api/fccusers/top/alltime';
+
+class FccLeaderboard extends Component {
+  constructor(props){
+    super(props);
+    this.handleSortingChange = this.handleSortingChange.bind(this);
+    this.state = ({sortBy: 'recent', campers: [], order: 'descending'});
+  }
+
+  handleSortingChange(e) {
+    console.log(e.target.id)
+    if(e.target.value !== this.state.sortBy+'-col') {
+      e.target.className = 'descending';
+      this.resetOtherSortingBtn(e.target.id);
+      this.updateCampers(e.target.value);
+    } else if(e.target.value === this.state.sortBy) {
+      var newOrder = this.state.order === 'descending' ? 'ascending' : 'descending';
+      e.target.className = 'sorting' + newOrder;
+      this.setState({order: newOrder});
+    }
+  };
+
+  resetOtherSortingBtn(id) {
+    var otherId = id === 'recent-btn' ? 'alltime-btn' : 'recent-btn'; 
+    document.getElementById(otherId).className = '';
+  }
+
+  componentDidMount() {
+    this.updateCampers(this.state.sortBy);
+  }
+
+  updateCampers(sortBy) {
+    var url = sortBy === 'recent' ? last30DaysURL : allTimeURL;
+    jquery.getJSON(url, (data) => {
+      this.setState({campers: data, sortBy: sortBy, order: 'descending'});
+    })
+  }
+
+  getSortedList() {
+    var sortBy = this.state.sortBy;
+    var sortedCampers = this.state.campers.sort((a, b) => 
+      sortBy === 'alltime' ? this.compare(a.alltime, b.alltime) : this.compare(a.recent, b.recent)
+    );
+
+    return sortedCampers;
+  }
+
+  compare(a, b) {
+    return this.state.order === 'descending' ? b - a : a - b;
+  }
+
+  createTableRows() {
+    var rows = [];
+    this.getSortedList().forEach(function(camper, index, array) {
+      rows.push(
+        <tr key = {index}>
+          <td>{index+1}</td>
+          <td>{camper.username}</td>
+          <td>{camper.recent}</td>
+          <td>{camper.alltime}</td>
+        </tr>
+      )
+    });
+    return rows;
+  }
+
+  render(){
+    return(
+      <div className="leader-board">
+        <h3> FreeCodeCamp Leaderboard</h3>
+        <table className="table table-stripped table-bordered">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Camper</th>
+              <th className="sort-by" id="recent-col" className="descending" onClick = {this.handleSortingChange}>Last30days</th>
+              <th className="sort-by" id="alltime-col" onClick = {this.handleSortingChange} >Total</th>
+            </tr>
+          </thead>
+          <tbody>
+          {this.createTableRows()}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+}
+
+export default FccLeaderboard;

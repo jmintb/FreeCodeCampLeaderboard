@@ -1,0 +1,25 @@
+.leader-board {
+    width: 80%;
+    max-width: 800px;
+    margin: auto;
+    margin-top: 100px;
+}
+
+.sort-by {
+    &:hover {
+        background-color: green;
+        color:white;
+    }
+    &.descending {
+        &:after {
+            content: "\25BC";
+            font-size: 14px;
+        }
+    }
+    &.ascending {
+        &:after {
+            content: "\25B2";
+            font-size: 14px;
+        }
+    }
+}
